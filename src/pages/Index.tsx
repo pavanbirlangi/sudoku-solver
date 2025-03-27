@@ -8,7 +8,7 @@ import UploadZone from '@/components/UploadZone';
 import Instructions from '@/components/Instructions';
 import ProcessingState from '@/components/ProcessingState';
 import ComparisonView from '@/components/ComparisonView';
-import { extractGridFromImage, solveSudoku, generateOverlayImage } from '@/lib/mockSolver';
+import { extractGridFromImage, solveSudoku } from '@/lib/mockSolver';
 
 // App state enum to track progress
 enum AppState {
@@ -55,7 +55,6 @@ const Index: React.FC = () => {
       
       // Stage 4: Finalize result
       setProcessingStage(3);
-      await generateOverlayImage(imagePreview!);
       
       // Complete processing
       setAppState(AppState.RESULT);

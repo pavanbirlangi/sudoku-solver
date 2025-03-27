@@ -43,7 +43,7 @@ const SudokuGrid: React.FC<SudokuGridProps> = ({
     >
       <div className="sudoku-grid">
         {grid.map((row, rowIndex) => (
-          <React.Fragment key={`row-${rowIndex}`}>
+          <div key={`row-${rowIndex}`} className="sudoku-row">
             {row.map((cell, colIndex) => {
               const isSectionBorderRight = (colIndex + 1) % 3 === 0 && colIndex < 8;
               const isSectionBorderBottom = (rowIndex + 1) % 3 === 0 && rowIndex < 8;
@@ -68,7 +68,7 @@ const SudokuGrid: React.FC<SudokuGridProps> = ({
                 </motion.div>
               );
             })}
-          </React.Fragment>
+          </div>
         ))}
       </div>
     </motion.div>

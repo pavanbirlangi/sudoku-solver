@@ -1,8 +1,9 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SudokuGrid from './SudokuGrid';
 import { ArrowLeft, ArrowRight, RefreshCw } from 'lucide-react';
+import { generateOverlayImage } from '@/lib/mockSolver';
 
 interface ComparisonViewProps {
   originalGrid: number[][];
@@ -17,7 +18,18 @@ const ComparisonView: React.FC<ComparisonViewProps> = ({
   originalImage,
   onReset,
 }) => {
-  const [showSudokuComparison, setShowSudokuComparison] = React.useState(true);
+  const [showSudokuComparison, setShowSudokuComparison] = useState(true);
+  const [overlayImage, setOverlayImage] = useState<string | null>(null);
+
+  // Generate the overlay image when component mounts
+  useEffect(() => {
+    const generateOverlay = async () => {
+      const overlay = await generateOverlayImage(originalImage, originalGrid, solvedGrid);
+      setOverlayImage(overlay);
+    };
+    
+    generateOverlay();
+  }, [originalImage, originalGrid, solvedGrid]);
 
   const toggleView = () => {
     setShowSudokuComparison(!showSudokuComparison);
@@ -94,11 +106,17 @@ const ComparisonView: React.FC<ComparisonViewProps> = ({
             >
               <div className="max-w-md mx-auto">
                 <div className="aspect-square relative overflow-hidden rounded-lg">
-                  <img
-                    src={originalImage}
-                    alt="Solved Sudoku Result"
-                    className="w-full h-full object-contain"
-                  />
+                  {overlayImage ? (
+                    <img
+                      src={overlayImage}
+                      alt="Solved Sudoku Result"
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <p>Generating overlay...</p>
+                    </div>
+                  )}
                 </div>
                 <p className="text-sm text-center text-muted-foreground mt-4">
                   This is a visual representation of the solution overlaid on your original image.

@@ -46,13 +46,92 @@ export const solveSudoku = (grid: number[][]): Promise<number[][]> => {
   });
 };
 
-// Mock function to generate an overlay image
-export const generateOverlayImage = (originalImage: string): Promise<string> => {
+// Function to generate an overlay image with the solution on top of the original image
+export const generateOverlayImage = (originalImage: string, originalGrid: number[][], solvedGrid: number[][]): Promise<string> => {
   return new Promise((resolve) => {
-    // In a real implementation, this would create an actual overlay
-    // For now, we'll just return the original image as a mock
-    setTimeout(() => {
+    // In a real implementation, this would create an actual overlay using canvas
+    // For now, we'll create a mock overlay by drawing on a canvas
+    
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    const img = new Image();
+    
+    img.onload = () => {
+      // Set canvas dimensions to match the image
+      canvas.width = img.width;
+      canvas.height = img.height;
+      
+      // Draw the original image
+      ctx!.drawImage(img, 0, 0, canvas.width, canvas.height);
+      
+      // Calculate the size and position for the Sudoku grid overlay
+      const gridSize = Math.min(canvas.width, canvas.height) * 0.8;
+      const cellSize = gridSize / 9;
+      const startX = (canvas.width - gridSize) / 2;
+      const startY = (canvas.height - gridSize) / 2;
+      
+      // Semi-transparent overlay for the grid area
+      ctx!.fillStyle = "rgba(255, 255, 255, 0.7)";
+      ctx!.fillRect(startX, startY, gridSize, gridSize);
+      
+      // Draw grid lines
+      ctx!.strokeStyle = "rgba(0, 0, 0, 0.5)";
+      ctx!.lineWidth = 1;
+      
+      // Draw the cell lines
+      for (let i = 0; i <= 9; i++) {
+        // Thicker lines for the 3x3 section borders
+        ctx!.lineWidth = (i % 3 === 0) ? 2 : 1;
+        
+        // Vertical lines
+        ctx!.beginPath();
+        ctx!.moveTo(startX + i * cellSize, startY);
+        ctx!.lineTo(startX + i * cellSize, startY + gridSize);
+        ctx!.stroke();
+        
+        // Horizontal lines
+        ctx!.beginPath();
+        ctx!.moveTo(startX, startY + i * cellSize);
+        ctx!.lineTo(startX + gridSize, startY + i * cellSize);
+        ctx!.stroke();
+      }
+      
+      // Add the numbers to the grid
+      ctx!.font = `bold ${cellSize * 0.6}px Arial`;
+      ctx!.textAlign = "center";
+      ctx!.textBaseline = "middle";
+      
+      for (let row = 0; row < 9; row++) {
+        for (let col = 0; col < 9; col++) {
+          const originalValue = originalGrid[row][col];
+          const solvedValue = solvedGrid[row][col];
+          
+          const x = startX + (col + 0.5) * cellSize;
+          const y = startY + (row + 0.5) * cellSize;
+          
+          if (originalValue === 0) {
+            // This is a solved number (wasn't in the original grid)
+            ctx!.fillStyle = "#2563EB"; // Blue color for solved numbers
+            ctx!.fillText(solvedValue.toString(), x, y);
+          } else {
+            // This was in the original grid
+            ctx!.fillStyle = "#000000"; // Black for original numbers
+            ctx!.fillText(originalValue.toString(), x, y);
+          }
+        }
+      }
+      
+      // Convert the canvas to a data URL and resolve the promise
+      resolve(canvas.toDataURL("image/png"));
+    };
+    
+    // Load the original image
+    img.src = originalImage;
+    
+    // If there's an error loading the image, return the original image
+    img.onerror = () => {
+      console.error("Error generating overlay image");
       resolve(originalImage);
-    }, 1000);
+    };
   });
 };
